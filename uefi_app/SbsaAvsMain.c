@@ -40,6 +40,7 @@ UINT32  g_sbsa_tests_total;
 UINT32  g_sbsa_tests_pass;
 UINT32  g_sbsa_tests_fail;
 UINT64  g_stack_pointer;
+UINT64  g_dt_ptr;
 UINT64  g_exception_ret_addr;
 UINT64  g_ret_addr;
 SHELL_FILE_HANDLE g_sbsa_log_file_handle;
@@ -278,6 +279,7 @@ STATIC CONST SHELL_PARAM_ITEM ParamList[] = {
   {L"-h"    , TypeFlag},     // -h    # help : info about commands
   {L"-nist" , TypeFlag},     // -nist # Binary Flag to enable the execution of NIST STS
   {L"-p"    , TypeValue},    // -p    # Enable/disable PCIe SBSA 6.0 (RCiEP) compliance tests.
+  {L"-dt"   , TypeValue},    // -dt   # Pass the dt blob addr
   {NULL     , TypeMax}
   };
 
@@ -345,6 +347,15 @@ ShellAppMainsbsa (
       g_sbsa_level = G_SBSA_LEVEL;
     }
   }
+
+  // Options with Values
+  CmdLineArg  = ShellCommandLineGetValue (ParamPackage, L"-dt");
+  if (CmdLineArg == NULL) {
+    g_dt_ptr = 0;
+  } else {
+    g_dt_ptr = StrDecimalToUintn(CmdLineArg);
+  }
+  Print(L"    DT %lx  \n", g_dt_ptr);
 
 
     // Options with Values

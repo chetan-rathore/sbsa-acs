@@ -39,6 +39,7 @@
   src/pal_peripherals.c
   src/pal_exerciser.c
   src/pal_smmu.c
+  src/pal_dt.c
   src_gic_its/sbsa_gic_its.c
   src_gic_its/sbsa_gic_redistributor.c
 
@@ -60,6 +61,8 @@
   DxeServicesTableLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
+  FdtLib
+  DxeServicesLib
 
 [Protocols]
   gEfiAcpiTableProtocolGuid                     ## CONSUMES
@@ -71,6 +74,8 @@
 [Guids]
   gEfiAcpi20TableGuid
   gEfiAcpiTableGuid
+  gFdtTableGuid
+  gDtPlatformDefaultDtbFileGuid
 
 [BuildOptions]
   GCC:*_*_*_ASM_FLAGS  =  -march=armv8.2-a

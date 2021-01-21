@@ -180,10 +180,10 @@
   UefiLib
   ShellLib
   DebugLib
-  BaseMemoryLib
-  ShellCEntryLib
-  UefiBootServicesTableLib
-  UefiRuntimeServicesTableLib
+#  BaseMemoryLib
+#  ShellCEntryLib
+#  UefiBootServicesTableLib
+#  UefiRuntimeServicesTableLib
 
 [Protocols]
   gEfiAcpiTableProtocolGuid                     ## CONSUMES

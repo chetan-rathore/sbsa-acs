@@ -24,6 +24,7 @@
 #include <Protocol/Cpu.h>
 
 #include "include/pal_uefi.h"
+#include "include/pal_dt.h"
 
 static   EFI_ACPI_6_1_MULTIPLE_APIC_DESCRIPTION_TABLE_HEADER *gMadtHdr;
 UINT8   *gSecondaryPeStack;
@@ -128,6 +129,8 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
   UINT32                        Length = 0;
   UINT64                        MpidrAff0Max = 0, MpidrAff1Max = 0, MpidrAff2Max = 0, MpidrAff3Max = 0;
 
+    pal_pe_create_info_table_dt(PeTable);
+    return;
 
   if (PeTable == NULL) {
     sbsa_print(AVS_PRINT_ERR, L"Input PE Table Pointer is NULL. Cannot create PE INFO \n");
@@ -141,6 +144,7 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
     sbsa_print(AVS_PRINT_INFO, L" MADT is at %x and length is %x \n", gMadtHdr, TableLength);
   } else {
     sbsa_print(AVS_PRINT_ERR, L"MADT not found \n");
+    pal_pe_create_info_table_dt(PeTable);
     return;
   }
 
@@ -325,5 +329,4 @@ pal_pe_data_cache_ops_by_va(UINT64 addr, UINT32 type)
       default:
           DataCacheCleanInvalidateVA(addr);
   }
-
 }
