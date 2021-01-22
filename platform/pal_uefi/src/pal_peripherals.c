@@ -311,7 +311,13 @@ pal_memory_get_unpopulated_addr(UINT64 *addr, UINT32 instance)
   UINT32                            Memory_instance = 0;
 
   /* Get the Global Coherency Domain Memory Space map table */
-  Status = gDS->GetMemorySpaceMap(&NumberOfDescriptors, &MemorySpaceMap);
+
+/*    TBD-DT : temp change , u boot doesnt have gDS (dxeservice table) getting compilation error
+    Status = gDS->GetMemorySpaceMap(&NumberOfDescriptors, &MemorySpaceMap);
+*/
+    Status = 1;
+    NumberOfDescriptors = 0;
+
   if (Status != EFI_SUCCESS)
     return Status;
 

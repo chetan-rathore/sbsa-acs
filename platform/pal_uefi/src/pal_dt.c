@@ -29,11 +29,9 @@
 
 #include "include/pal_uefi.h"
 #include "include/pal_dt.h"
+#include "include/pal_dt_spec.h"
 
 extern UINT64 g_dt_ptr;
-
-#define PROPERTY_MASK_REG1  0xFF
-#define PROPERTY_MASK_REG0  0xFFFFFF
 
 /**
   @brief   Use UEFI System Table to look up FdtTableGuid and returns the FDT Blob Address
@@ -52,25 +50,24 @@ pal_get_dt_ptr()
   for (Index = 0; Index < gST->NumberOfTableEntries; Index++) {
     if (CompareGuid (&gFdtTableGuid, &(gST->ConfigurationTable[Index].VendorGuid))) {
       DTB = gST->ConfigurationTable[Index].VendorTable;
+      sbsa_print(AVS_PRINT_ERR, L"DTB %x \n", DTB);
     }
   }
 
-  sbsa_print(AVS_PRINT_ERR, L"DTB %x \n", DTB);
-
-  if (DTB) {
+  if (!DTB) {
     // Can't get fdt address from firmware, check if user has passed it.
    sbsa_print(AVS_PRINT_ERR, L"g_dt_ptr %x \n", g_dt_ptr);
 
-   if (g_dt_ptr)
+   if (!g_dt_ptr)
         return 0; //No fdt addr found
    else
         DTB = (VOID *) g_dt_ptr;
   }
 
   Status = fdt_check_header(DTB);
-  sbsa_print(AVS_PRINT_ERR, L"fdt hdr check status %x \n", Status);
+  sbsa_print(AVS_PRINT_ERR, L"fdt hdr check status %s \n", (Status ? "FAILED" : "PASSED"));
 
-  if (!Status) {
+  if (Status) {
     return 0;
   }
   return (UINT64) DTB;
@@ -107,28 +104,32 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
   ptr = PeTable->pe_info;
 
   offset = fdt_node_offset_by_prop_value((const void*) dt_ptr, -1, "device_type", "cpu", 4);
-  sbsa_print(AVS_PRINT_ERR, L" offset %d \n", offset);
+  sbsa_print(AVS_PRINT_ERR, L" cpu node offset %d \n", offset);
+
   if (offset != -FDT_ERR_NOTFOUND) {
       parent_offset = fdt_parent_offset((const void*) dt_ptr, offset);
+
       size_cell = fdt_size_cells((const void*) dt_ptr, parent_offset);
+      sbsa_print(AVS_PRINT_ERR, L" cpu node size cell %d \n", size_cell);
       if (size_cell != 0) {
         sbsa_print(AVS_PRINT_ERR, L"Invalid size cell for offset %d \n", parent_offset);
         return;
       }
+
       addr_cell = fdt_address_cells((const void*) dt_ptr, offset);
+      sbsa_print(AVS_PRINT_ERR, L" cpu node addr cell %d \n", addr_cell);
       if (addr_cell <= 0 || addr_cell > 2 ){
         sbsa_print(AVS_PRINT_ERR, L"Invalid address cell for offset %x \n", parent_offset);
         return;
       }
   }
+
   while (offset != -FDT_ERR_NOTFOUND) {
-      offset = fdt_node_offset_by_prop_value((const void*) dt_ptr, offset, "device_type", "cpu", 4);
-      sbsa_print(AVS_PRINT_ERR, L" CPU %x \n", PeTable->header.num_of_pe);
-      sbsa_print(AVS_PRINT_ERR, L" offset %x \n", offset);
+      sbsa_print(AVS_PRINT_ERR, L" cpu node%d offset %x \n", PeTable->header.num_of_pe, offset);
 
       reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "reg", &fdt_err);
       if (NULL == reg_prop || fdt_err < 0) {
-        sbsa_print(AVS_PRINT_ERR, L"reg property not found for offset %x,Error %d \n", offset,fdt_err);
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
         return;
       }
 
@@ -141,11 +142,11 @@ pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable)
         ptr->mpidr = (reg_val[0] & PROPERTY_MASK_REG0);
       }
 
-      sbsa_print(AVS_PRINT_ERR, L"mpidr =  %x \n", ptr->mpidr);
+      offset = fdt_node_offset_by_prop_value((const void*) dt_ptr, offset, "device_type", "cpu", 4);
       ptr->pe_num   = PeTable->header.num_of_pe;
       ptr->pmu_gsiv = 0;  //TBD
       ptr++;
       PeTable->header.num_of_pe++;
-
   }
+  dt_dump_pe_table(PeTable);
 }

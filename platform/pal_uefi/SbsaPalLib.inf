@@ -40,6 +40,7 @@
   src/pal_exerciser.c
   src/pal_smmu.c
   src/pal_dt.c
+  src/pal_dt_debug.c
   src_gic_its/sbsa_gic_its.c
   src_gic_its/sbsa_gic_redistributor.c
 
@@ -58,7 +59,7 @@
   DebugLib
   BaseMemoryLib
   ShellCEntryLib
-  DxeServicesTableLib
+#  DxeServicesTableLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
   FdtLib

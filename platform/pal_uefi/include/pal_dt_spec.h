@@ -15,18 +15,12 @@
  * limitations under the License.
 **/
 
-#ifndef __PAL_DT_H__
-#define __PAL_DT_H__
+#ifndef __PAL_DT_SPEC_H__
+#define __PAL_DT_SPEC_H__
 
-VOID
-pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable);
+/*  PE related */
+#define PROPERTY_MASK_REG1  0xFF
+#define PROPERTY_MASK_REG0  0xFFFFFF
 
-
-
-
-/*-----------------DEBUG FUNCTION----------------*/
-
-VOID
-dt_dump_pe_table(PE_INFO_TABLE *PeTable);
 
 #endif
