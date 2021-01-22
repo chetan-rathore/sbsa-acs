@@ -31,6 +31,7 @@
 
 #include "include/platform_override.h"
 #include "include/pal_uefi.h"
+#include "include/pal_dt.h"
 #include "include/sbsa_pcie_enum.h"
 
 static EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER *gMcfgHdr;
@@ -77,6 +78,9 @@ pal_pcie_create_info_table(PCIE_INFO_TABLE *PcieTable)
   EFI_ACPI_MEMORY_MAPPED_ENHANCED_CONFIGURATION_SPACE_BASE_ADDRESS_ALLOCATION_STRUCTURE  *Entry = NULL;
   UINT32 length = sizeof(EFI_ACPI_MEMORY_MAPPED_CONFIGURATION_BASE_ADDRESS_TABLE_HEADER);
   UINT32 i = 0;
+
+  pal_pcie_create_info_table_dt(PcieTable);
+  return;
 
   if (PcieTable == NULL) {
     sbsa_print(AVS_PRINT_ERR, L"Input PCIe Table Pointer is NULL. Cannot create PCIe INFO \n");

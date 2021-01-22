@@ -144,7 +144,6 @@ pal_pe_create_info_table(PE_INFO_TABLE *PeTable)
     sbsa_print(AVS_PRINT_INFO, L" MADT is at %x and length is %x \n", gMadtHdr, TableLength);
   } else {
     sbsa_print(AVS_PRINT_ERR, L"MADT not found \n");
-    pal_pe_create_info_table_dt(PeTable);
     return;
   }
 
