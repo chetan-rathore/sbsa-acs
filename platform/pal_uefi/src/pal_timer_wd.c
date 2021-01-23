@@ -25,6 +25,7 @@
 
 #include "include/pal_uefi.h"
 #include "include/platform_override.h"
+#include "include/pal_dt.h"
 
 static EFI_ACPI_6_1_GENERIC_TIMER_DESCRIPTION_TABLE *gGtdtHdr;
 
@@ -170,6 +171,9 @@ pal_wd_create_info_table(WD_INFO_TABLE *WdTable)
   WD_INFO_BLOCK               *WdEntry = NULL;
   UINT32                      Length= 0;
   UINT32                      num_of_entries;
+
+  pal_wd_create_info_table_dt(WdTable);
+  return;
 
   if (WdTable == NULL) {
     sbsa_print(AVS_PRINT_ERR, L"Input Watchdog Table Pointer is NULL. Cannot create Watchdog INFO \n");

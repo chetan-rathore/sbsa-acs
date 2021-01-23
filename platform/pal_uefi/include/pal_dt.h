@@ -21,12 +21,16 @@
 VOID
 pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable);
 
-
+VOID
+pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable);
 
 
 /*-----------------DEBUG FUNCTION----------------*/
 
 VOID
 dt_dump_pe_table(PE_INFO_TABLE *PeTable);
+
+VOID
+dt_dump_wd_table(WD_INFO_TABLE *WdTable);
 
 #endif
