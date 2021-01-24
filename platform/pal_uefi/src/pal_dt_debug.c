@@ -42,3 +42,28 @@ dt_dump_pe_table(PE_INFO_TABLE *PeTable)
     Index++;
   }
 }
+
+
+/**
+  @brief  This API is use to dump WD_INFO Table after filling from DT
+
+  @param  WdTable  - Address where the WD information needs to be filled.
+
+  @return  None
+**/
+VOID
+dt_dump_wd_table(WD_INFO_TABLE *WdTable)
+{
+  UINT32 Index = 0;
+
+  sbsa_print(AVS_PRINT_ERR, L"************WD TABLE************ \n");
+  sbsa_print(AVS_PRINT_ERR, L" NUM WD %d \n", WdTable->header.num_wd);
+
+  while (Index < WdTable->header.num_wd) {
+    sbsa_print(AVS_PRINT_ERR, L" WD REFRESH BASE  :%x\n", WdTable->wd_info[Index].wd_refresh_base);
+    sbsa_print(AVS_PRINT_ERR, L" WD CONTROL BASE  :%x\n", WdTable->wd_info[Index].wd_ctrl_base);
+    sbsa_print(AVS_PRINT_ERR, L" WD GSIV          :%x\n", WdTable->wd_info[Index].wd_gsiv);
+    sbsa_print(AVS_PRINT_ERR, L" WD FLAGS         :%x\n", WdTable->wd_info[Index].wd_flags);
+    Index++;
+  }
+}
