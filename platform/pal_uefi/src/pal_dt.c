@@ -242,4 +242,45 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
       WdEntry++;
   }
   dt_dump_wd_table(WdTable);
+
+}
+
+/**
+  @brief  This API fills in the GIC_INFO Table with information about the GIC in the
+          system. This is achieved by parsing the DT blob.
+  @param  PeTable  - Address where the GIC information needs to be filled.
+  @return  None
+**/
+VOID
+pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
+{
+    sbsa_print(AVS_PRINT_ERR, L"Dummy GIC DT print \n");
+}
+
+/**
+  @brief  This API fills in the PCIE_INFO Table with information about the pcie in the
+          system. This is achieved by parsing the DT blob.
+
+  @param  PeTable  - Address where the PCIe information needs to be filled.
+
+  @return  None
+**/
+VOID
+pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable)
+{
+    sbsa_print(AVS_PRINT_ERR, L"Dummy PCIE DT print \n");
+}
+
+/**
+  @brief  This API fills in the TIMER_INFO Table with information about the timer in the
+          system. This is achieved by parsing the DT blob.
+
+  @param  PeTable  - Address where the TIMER information needs to be filled.
+
+  @return  None
+**/
+VOID
+pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
+{
+    sbsa_print(AVS_PRINT_ERR, L"Dummy Timer DT print \n");
 }

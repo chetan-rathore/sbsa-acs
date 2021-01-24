@@ -426,18 +426,19 @@ ShellAppMainsbsa (
 
   Print(L" Creating Platform Information Tables \n");
   Status = createPeInfoTable();
-  if (Status)
-    return Status;
+//  if (Status)
+//    return Status;
 
   Status = createGicInfoTable();
-  if (Status)
-    return Status;
+//  if (Status)
+//    return Status;
 
   createTimerInfoTable();
   createWatchdogInfoTable();
   createPcieVirtInfoTable();
   createPeripheralInfoTable();
 
+return 1;
   val_allocate_shared_mem();
 
   // Initialise exception vector, so any unexpected exception gets handled by default SBSA exception handler

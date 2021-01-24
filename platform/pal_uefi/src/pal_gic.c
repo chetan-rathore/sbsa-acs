@@ -26,6 +26,7 @@
 #include <Protocol/HardwareInterrupt2.h>
 
 #include "include/pal_uefi.h"
+#include "include/pal_dt.h"
 #include "include/sbsa_pcie_enum.h"
 #include "src_gic_its/sbsa_gic_its.h"
 
@@ -55,6 +56,9 @@ pal_gic_create_info_table(GIC_INFO_TABLE *GicTable)
   GIC_INFO_ENTRY                *GicEntry = NULL;
   UINT32                         Length= 0;
   UINT32                         TableLength;
+
+  pal_gic_create_info_table_dt(GicTable);
+  return;
 
   if (GicTable == NULL) {
     sbsa_print(AVS_PRINT_ERR, L"Input GIC Table Pointer is NULL. Cannot create GIC INFO \n");

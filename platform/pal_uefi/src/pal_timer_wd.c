@@ -24,6 +24,7 @@
 #include "Include/IndustryStandard/Acpi61.h"
 
 #include "include/pal_uefi.h"
+#include "include/pal_dt.h"
 #include "include/platform_override.h"
 #include "include/pal_dt.h"
 
@@ -69,6 +70,9 @@ pal_timer_create_info_table(TIMER_INFO_TABLE *TimerTable)
   UINT32                      Length= 0;
   UINT32                      i;
   UINT32                      num_of_entries;
+
+  pal_timer_create_info_table_dt(TimerTable);
+  return;
 
   if (TimerTable == NULL) {
     sbsa_print(AVS_PRINT_ERR, L"Input Timer Table Pointer is NULL. Cannot create Timer INFO \n");

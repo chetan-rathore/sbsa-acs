@@ -22,6 +22,15 @@ VOID
 pal_pe_create_info_table_dt(PE_INFO_TABLE *PeTable);
 
 VOID
+pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable);
+
+VOID
+pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable);
+
+VOID
+pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable);
+
+VOID
 pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable);
 
 
@@ -29,6 +38,15 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable);
 
 VOID
 dt_dump_pe_table(PE_INFO_TABLE *PeTable);
+
+VOID
+dt_dump_gic_table(GIC_INFO_TABLE *GicTable);
+
+VOID
+dt_dump_pcie_table(PCIE_INFO_TABLE *PcieTable);
+
+VOID
+dt_dump_timer_table(TIMER_INFO_TABLE *TimerTable);
 
 VOID
 dt_dump_wd_table(WD_INFO_TABLE *WdTable);
