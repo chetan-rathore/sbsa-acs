@@ -268,7 +268,68 @@ pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
 VOID
 pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable)
 {
-    sbsa_print(AVS_PRINT_ERR, L"Dummy PCIE DT print \n");
+  PCIE_INFO_BLOCK                 *ptr = NULL;
+  struct fdt_property *reg_prop = NULL;
+  int fdt_err, addr_cell, size_cell;
+  int reg_val[4] = {0, 0, 0, 0};
+  int bus_range[2] = {0, 0};
+  UINT64 dt_ptr = 0;
+  int offset, parent_offset;
+
+  if (PcieTable == NULL)
+    return;
+
+  dt_ptr = pal_get_dt_ptr();
+  if (dt_ptr == 0) {
+    sbsa_print(AVS_PRINT_ERR, L"dt_ptr is NULL \n");
+    return;
+  }
+
+  PcieTable->num_entries = 0;
+  ptr = PcieTable->block;
+
+  offset = fdt_node_offset_by_prop_value((const void*) dt_ptr, -1, "device_type", "pci", 4);
+  sbsa_print(AVS_PRINT_ERR, L" pci node offset %d \n", offset);
+
+  while (offset != -FDT_ERR_NOTFOUND) {
+      size_cell = fdt_size_cells((const void*) dt_ptr, offset);
+      sbsa_print(AVS_PRINT_ERR, L" pcie node size cell %d \n", size_cell);
+      if (size_cell != 2) {
+        sbsa_print(AVS_PRINT_ERR, L"Invalid size cell \n");
+        return;
+      }
+
+      addr_cell = fdt_address_cells((const void*) dt_ptr, offset);
+      sbsa_print(AVS_PRINT_ERR, L" pci node addr cell %d \n", addr_cell);
+      if (addr_cell != 3 ){
+        sbsa_print(AVS_PRINT_ERR, L"Invalid address cell \n");
+        return;
+      }
+
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "reg", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+      memcpy(reg_val, reg_prop->data, addr_cell*sizeof(int));
+      ptr->ecam_base = ((UINT64)(reg_val[0]  << 32) | reg_val[1]);
+      ptr->segment_num = 0;
+
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "bus-range", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"bus range property read err %d \n", fdt_err);
+        return;
+      }
+      memcpy(bus_range, reg_prop->data, size_cell*sizeof(int));
+      ptr->start_bus_num = bus_range[0];
+      ptr->end_bus_num = bus_range[1];
+
+      offset = fdt_node_offset_by_prop_value((const void*) dt_ptr, offset, "device_type", "pci", 4);
+      ptr++;
+      PcieTable->num_entries++;
+  }
+
+  dt_dump_pcie_table(PeTable);
 }
 
 /**
