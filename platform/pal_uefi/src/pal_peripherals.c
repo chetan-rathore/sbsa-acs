@@ -30,6 +30,7 @@
 #include "include/pal_uefi.h"
 #include "include/sbsa_pcie_enum.h"
 #include "include/platform_override.h"
+#include "include/pal_dt.h"
 
 #define USB_CLASSCODE   0x0C0300
 #define SATA_CLASSCODE  0x010600
@@ -225,6 +226,9 @@ pal_memory_create_info_table(MEMORY_INFO_TABLE *memoryInfoTable)
     sbsa_print(AVS_PRINT_ERR, L"Input Memory Table Pointer is NULL. Cannot create Memory INFO \n");
     return;
   }
+
+  pal_memory_create_info_table_dt(memoryInfoTable);
+  return;
 
 // Retrieve the UEFI Memory Map
 

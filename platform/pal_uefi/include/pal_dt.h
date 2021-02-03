@@ -33,6 +33,8 @@ pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable);
 VOID
 pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable);
 
+VOID
+pal_memory_create_info_table_dt(MEMORY_INFO_TABLE *memoryInfoTable);
 
 /*-----------------DEBUG FUNCTION----------------*/
 
@@ -50,5 +52,10 @@ dt_dump_timer_table(TIMER_INFO_TABLE *TimerTable);
 
 VOID
 dt_dump_wd_table(WD_INFO_TABLE *WdTable);
+
+VOID
+dt_dump_memory_table(MEMORY_INFO_TABLE *memoryInfoTable);
+
+int fdt_interrupt_cells(const void *fdt, int nodeoffset);
 
 #endif

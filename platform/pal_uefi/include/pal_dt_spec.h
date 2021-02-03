@@ -40,4 +40,10 @@
 #define IRQ_TYPE_LEVEL_HIGH       0x00000004         /* Level high type */
 #define IRQ_TYPE_LEVEL_LOW        0x00000008         /* Level low type */
 
+/* GIC related */
+#define PROPERTY_GIC_REG_SIZE_MAX 20
+
+/* Timer related */
+#define PROPERTY_TIMER_REG_SIZE_MAX 12
+
 #endif

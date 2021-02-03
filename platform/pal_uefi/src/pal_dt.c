@@ -33,6 +33,26 @@
 
 extern UINT64 g_dt_ptr;
 
+int fdt_interrupt_cells(const void *fdt, int nodeoffset)
+{
+        const fdt32_t *ic;
+        int val;
+        int len;
+
+        ic = fdt_getprop(fdt, nodeoffset, "#interrupt-cells", &len);
+        if (!ic)
+                return 2;
+
+        if (len != sizeof(*ic))
+                return -FDT_ERR_BADNCELLS;
+
+        val = fdt32_to_cpu(*ic);
+        if (val < 0)
+                return -FDT_ERR_BADNCELLS;
+
+        return val;
+}
+
 /**
   @brief   Use UEFI System Table to look up FdtTableGuid and returns the FDT Blob Address
 
@@ -50,7 +70,7 @@ pal_get_dt_ptr()
   for (Index = 0; Index < gST->NumberOfTableEntries; Index++) {
     if (CompareGuid (&gFdtTableGuid, &(gST->ConfigurationTable[Index].VendorGuid))) {
       DTB = gST->ConfigurationTable[Index].VendorTable;
-      sbsa_print(AVS_PRINT_ERR, L"DTB %x \n", DTB);
+      sbsa_print(AVS_PRINT_ERR, L"DTB %x \n\n\n\n", DTB);
     }
   }
 
@@ -65,7 +85,7 @@ pal_get_dt_ptr()
   }
 
   Status = fdt_check_header(DTB);
-  sbsa_print(AVS_PRINT_ERR, L"fdt hdr check status %s \n", (Status ? "FAILED" : "PASSED"));
+  sbsa_print(AVS_PRINT_ERR, L"fdt hdr check status %d \n", Status);
 
   if (Status) {
     return 0;
@@ -254,7 +274,104 @@ pal_wd_create_info_table_dt(WD_INFO_TABLE *WdTable)
 VOID
 pal_gic_create_info_table_dt(GIC_INFO_TABLE *GicTable)
 {
-    sbsa_print(AVS_PRINT_ERR, L"Dummy GIC DT print \n");
+  GIC_INFO_ENTRY                *ptr = NULL;
+  struct fdt_property *reg_prop = NULL;
+  int fdt_err, interrupt_cell, rd;
+  int its_val[4] = {0, 0, 0, 0};
+  int gic_type[4] = {0x1001, 0x1002, 0x1003, 0x1004};
+  int reg_val[PROPERTY_GIC_REG_SIZE_MAX] = {0};
+  UINT64 dt_ptr = 0;
+  int offset, i = 0, j = 0;
+
+  if (GicTable == NULL)
+    return;
+
+  dt_ptr = pal_get_dt_ptr();
+  if (dt_ptr == 0) {
+    sbsa_print(AVS_PRINT_ERR, L"dt_ptr is NULL \n");
+    return;
+  }
+
+  ptr = GicTable->gic_info;
+
+  offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, "arm,gic-v3");
+  sbsa_print(AVS_PRINT_ERR, L" gic node offset %d \n", offset);
+
+  while (offset != -FDT_ERR_NOTFOUND) {
+      GicTable->header.gic_version = 3;
+      interrupt_cell = fdt_interrupt_cells((const void*) dt_ptr, offset);
+      sbsa_print(AVS_PRINT_ERR, L" gic node interrupt cell %d \n", interrupt_cell);
+      if (interrupt_cell < 3){
+        sbsa_print(AVS_PRINT_ERR, L"Invalid interrupt cell for offset %d \n", offset);
+        return;
+      }
+
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "address-cells", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "size-cells", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "reg", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "redistributor-regions", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0)
+          rd = 1;
+      else
+          rd = 2;//reg_prop->data;
+
+      memcpy(reg_val, reg_prop->data, PROPERTY_GIC_REG_SIZE_MAX*sizeof(int));
+      while(i < (8+(rd*4))){
+        ptr->type = gic_type[j];
+        ptr->base = ((UINT64)((UINT64)reg_val[i]  << 32) | reg_val[i+1]);
+        ptr->length = reg_val[i+3];
+        if (rd != 0) {
+            i = (i+4)*(rd+1);
+            rd = 0;
+        }
+        else
+            i++;
+       ptr++;
+       j++;
+     }
+      i = 4;
+      while(i <= (rd*4)){
+         ptr->type = gic_type[2];
+         ptr->base = ((UINT64)((UINT64)reg_val[i]  << 32) | reg_val[i+1]);
+         ptr->length = reg_val[i+3];
+         i++;
+         ptr++;
+      }
+
+      offset = fdt_node_offset_by_compatible((const void *)dt_ptr, offset, "arm,gic-v3-its");
+      while (offset != -FDT_ERR_NOTFOUND) {
+          reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "reg", &fdt_err);
+          if (NULL == reg_prop || fdt_err < 0) {
+            sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+            return;
+          }
+
+          memcpy(its_val, reg_prop->data, 4*sizeof(int));
+          offset = fdt_node_offset_by_compatible((const void *)dt_ptr, offset, "arm,gic-v3-its");
+          ptr->type = gic_type[3];
+          ptr->base = ((UINT64)((UINT64)its_val[0]  << 32) | its_val[1]);
+          ptr->length = its_val[3];
+          GicTable->header.num_its++;
+          ptr++;
+      }
+
+  }
+  dt_dump_gic_table(GicTable);
 }
 
 /**
@@ -274,7 +391,7 @@ pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable)
   int reg_val[4] = {0, 0, 0, 0};
   int bus_range[2] = {0, 0};
   UINT64 dt_ptr = 0;
-  int offset, parent_offset;
+  int offset;
 
   if (PcieTable == NULL)
     return;
@@ -312,7 +429,7 @@ pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable)
         return;
       }
       memcpy(reg_val, reg_prop->data, addr_cell*sizeof(int));
-      ptr->ecam_base = ((UINT64)(reg_val[0]  << 32) | reg_val[1]);
+      ptr->ecam_base = ((UINT64)((UINT64)reg_val[0]  << 32) | reg_val[1]);
       ptr->segment_num = 0;
 
       reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "bus-range", &fdt_err);
@@ -329,19 +446,116 @@ pal_pcie_create_info_table_dt(PCIE_INFO_TABLE *PcieTable)
       PcieTable->num_entries++;
   }
 
-  dt_dump_pcie_table(PeTable);
+  dt_dump_pcie_table(PcieTable);
 }
 
 /**
-  @brief  This API fills in the TIMER_INFO Table with information about the timer in the
-          system. This is achieved by parsing the DT blob.
+  @brief  This API fills in the MEMORY_INFO_TABLE with information about memory in the
+          system. This is achieved by parsing the UEFI memory map.
 
-  @param  PeTable  - Address where the TIMER information needs to be filled.
+  @param  memoryInfoTable  - Address where the memory information needs to be filled.
 
   @return  None
 **/
 VOID
+pal_memory_create_info_table_dt(MEMORY_INFO_TABLE *memoryInfoTable)
+{
+  MEM_INFO_BLOCK      *ptr = NULL;
+  struct fdt_property *reg_prop = NULL;
+  int fdt_err;
+  int reg_val[8] = {0};
+  UINT64 dt_ptr = 0;
+  int offset;
+
+  ptr = memoryInfoTable->info;
+  offset = fdt_node_offset_by_prop_value((const void*) dt_ptr, -1, "device_type", "memory", 7);
+  sbsa_print(AVS_PRINT_ERR, L" pci node offset %d \n", offset);
+
+  while (offset != -FDT_ERR_NOTFOUND) {
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "reg", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+      memcpy(reg_val, reg_prop->data, 4*sizeof(int));
+      ptr->type = MEMORY_TYPE_NORMAL;
+      ptr->phy_addr = ((UINT64)((UINT64)reg_val[0]  << 32) | reg_val[1]);
+      ptr->virt_addr = ((UINT64)((UINT64)reg_val[0]  << 32) | reg_val[1]); // virt_addr is same as phy_addr in uefi
+      ptr->size = reg_val[3];
+
+      offset = fdt_node_offset_by_prop_value((const void*) dt_ptr, offset, "device_type", "memory", 7);
+      ptr++;
+  }
+
+  offset = fdt_node_offset_by_compatible((const void *)dt_ptr, offset, "shared-dma-pool");
+  while (offset != -FDT_ERR_NOTFOUND) {
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "reg", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+      memcpy(reg_val, reg_prop->data, 4*sizeof(int));
+      ptr->type = MEMORY_TYPE_RESERVED;
+      ptr->phy_addr = ((UINT64)((UINT64)reg_val[0]  << 32) | reg_val[1]);
+      ptr->virt_addr = ((UINT64)((UINT64)reg_val[0]  << 32) | reg_val[1]);
+      ptr->size = reg_val[3];
+
+      offset = fdt_node_offset_by_compatible((const void *)dt_ptr, offset, "shared-dma-pool");
+      ptr++;
+  }
+  dt_dump_memory_table(memoryInfoTable);
+}
+
+/**
+   @brief  This API fills in the TIMER_INFO Table with information about the timer in the
+           system. This is achieved by parsing the DT blob.
+
+   @param  TimerTable  - Address where the timer information needs to be filled.
+
+   @return  None
+**/
+
+VOID
 pal_timer_create_info_table_dt(TIMER_INFO_TABLE *TimerTable)
 {
-    sbsa_print(AVS_PRINT_ERR, L"Dummy Timer DT print \n");
+  //TIMER_INFO_GTBLOCK         *GtEntry = NULL;
+  struct fdt_property *reg_prop = NULL;
+  int fdt_err;
+  int reg_val[8] = {0};
+  UINT64 dt_ptr = 0;
+  int offset;
+  TimerTable->header.num_platform_timer = 0;
+ //GtEntry = TimerTable->gt_info;
+  offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, "arm,armv8-timer");
+  sbsa_print(AVS_PRINT_ERR, L" pci node offset %d \n", offset);
+
+  while (offset != -FDT_ERR_NOTFOUND) {
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "interrupts", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+
+      memcpy(reg_val, reg_prop->data, PROPERTY_TIMER_REG_SIZE_MAX*sizeof(int));
+      TimerTable->header.s_el1_timer_gsiv = reg_val[1];
+      TimerTable->header.ns_el1_timer_gsiv = reg_val[4];
+      TimerTable->header.virtual_timer_gsiv = reg_val[7];
+      TimerTable->header.el2_timer_gsiv    = reg_val[10];
+
+      TimerTable->header.num_platform_timer++;
+      offset = fdt_node_offset_by_compatible((const void *)dt_ptr, offset, "arm,armv8-timer");
+
+  }
+
+  offset = fdt_node_offset_by_compatible((const void *)dt_ptr, -1, "arm,armv7-timer-mem");
+  sbsa_print(AVS_PRINT_ERR, L" pci node offset %d \n", offset);
+
+  while (offset != -FDT_ERR_NOTFOUND) {
+      reg_prop = fdt_get_property_w((void *)dt_ptr, offset, "interrupts", &fdt_err);
+      if (NULL == reg_prop || fdt_err < 0) {
+        sbsa_print(AVS_PRINT_ERR, L"reg property %x, Error %d \n", offset,fdt_err);
+        return;
+      }
+  }
+     sbsa_print(AVS_PRINT_ERR, L"Dummy Timer DT print \n");
 }
