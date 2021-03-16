@@ -60,11 +60,13 @@ To start the ACS build for ES, perform the following steps:
 2.  git clone https://github.com/tianocore/edk2-libc
 3.  git clone https://github.com/ARM-software/bsa-acs ShellPkg/Application/bsa-acs
 4.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
+
      - Add BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
-   - If the Base System firmware uses ACPI tables
+   If the Base System firmware uses ACPI tables
      - Add BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi/BsaPalLib.inf
-   - If the Base System firmware uses Device tree**
+   If the Base System firmware uses Device tree**
      - Add BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_dt/BsaPalLib.inf
+    
 5.  Add ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf in the [components] section of ShellPkg/ShellPkg.dsc
 
 ** For systems which support Device tree, ACS efi application is run on top of efi shell which runs
