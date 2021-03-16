@@ -62,9 +62,9 @@ To start the ACS build for ES, perform the following steps:
 4.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
 
      - Add BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
-   If the Base System firmware uses ACPI tables
+>   If the Base System firmware uses ACPI tables
      - Add BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi/BsaPalLib.inf
-   If the Base System firmware uses Device tree**
+>   If the Base System firmware uses Device tree**
      - Add BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_dt/BsaPalLib.inf
     
 5.  Add ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf in the [components] section of ShellPkg/ShellPkg.dsc
