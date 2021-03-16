@@ -72,7 +72,8 @@ To start the ACS build for ES, perform the following steps:
 5.  Add ShellPkg/Application/bsa-acs/uefi_app/BsaAcs.inf in the [components] section of ShellPkg/ShellPkg.dsc
 
 ** For systems which support Device tree, ACS efi application is run on top of efi shell which runs
-   on u-boot. Below change in edk2 code **MdeModulepkg/  before compiling for IR system.
+   on u-boot as efi payload.
+   - Below change in edk2 code MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.c is required before compiling for IR system.
 >          -Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **) &gHiiConfigRouting);
 >          -ASSERT_EFI_ERROR (Status);
 >          +//Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **) &gHiiConfigRouting);
