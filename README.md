@@ -60,8 +60,7 @@ To start the ACS build for ES, perform the following steps:
 2.  git clone https://github.com/tianocore/edk2-libc
 3.  git clone https://github.com/ARM-software/bsa-acs ShellPkg/Application/bsa-acs
 4.  Add the following to the [LibraryClasses.common] section in ShellPkg/ShellPkg.dsc
-
->   Add BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
+>          Add BsaValLib|ShellPkg/Application/bsa-acs/val/BsaValLib.inf
 
 - If the Base System firmware uses ACPI tables
 >          Add BsaPalLib|ShellPkg/Application/bsa-acs/platform/pal_uefi/BsaPalLib.inf
