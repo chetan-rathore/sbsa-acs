@@ -37,7 +37,7 @@ esr(uint64_t interrupt_type, void *context)
   /* Update the ELR to return to test specified address */
   val_pe_update_elr(context, (uint64_t)branch_to_test);
 
-  val_print(AVS_PRINT_INFO, "\n       Received exception of type: %d", interrupt_type);
+  val_print(AVS_PRINT_DEBUG, "\n       Received exception of type: %d", interrupt_type);
   val_set_status(pe_index, RESULT_PASS(g_sbsa_level, TEST_NUM, 01));
 }
 
@@ -55,6 +55,7 @@ payload(void)
   uint32_t test_skip = 1;
   uint64_t bar_base;
   uint32_t status;
+  uint32_t timeout;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
@@ -79,6 +80,8 @@ payload(void)
   while (tbl_index < bdf_tbl_ptr->num_entries)
   {
       bdf = bdf_tbl_ptr->device[tbl_index++].bdf;
+      val_print(AVS_PRINT_DEBUG, "\n      tbl_index %x", tbl_index - 1);
+      val_print(AVS_PRINT_DEBUG, "      BDF %x", bdf);
 
       /*
        * For a Function with type 0 config space header, obtain
@@ -94,6 +97,7 @@ payload(void)
           val_pcie_get_mmio_bar(bdf, &bar_base);
 
       /* Skip this function if it doesn't have mmio BAR */
+      val_print(AVS_PRINT_DEBUG, "      Bar Base %x", bar_base);
       if (!bar_base)
          continue;
 
@@ -126,6 +130,8 @@ payload(void)
        * even cause an sync/async exception.
        */
       bar_data = (*(volatile addr_t *)bar_base);
+      timeout = TIMEOUT_SMALL;
+      while (--timeout > 0);
 
 exception_return:
       /*
