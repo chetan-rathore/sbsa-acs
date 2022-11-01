@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2018, 2020, 2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,38 +18,57 @@
 #include "val/include/sbsa_avs_val.h"
 #include "val/include/val_interface.h"
 
-#include "val/include/sbsa_avs_iovirt.h"
 #include "val/include/sbsa_avs_smmu.h"
+#include "val/include/sbsa_avs_pcie.h"
 
-#define TEST_NUM   (AVS_SMMU_TEST_NUM_BASE + 6)
-#define TEST_DESC  "Unique stream id for each req id  "
+#define TEST_NUM   (AVS_SMMU_TEST_NUM_BASE + 4)
+#define TEST_DESC  "If PCIe, Check Stall model        "
 
 static
 void
 payload(void)
 {
-  int num_rc;
+
+  uint64_t data;
+  uint32_t num_smmu;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  num_rc = val_iovirt_get_pcie_rc_info(NUM_PCIE_RC, 0);
-  if(!num_rc) {
-      val_print(AVS_PRINT_ERR, "\n       No Root Complex discovered ", 0);
-      val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 3));
+  data = val_pcie_get_info(PCIE_INFO_NUM_ECAM, 0);
+
+  if (data == 0) {
+      val_print(AVS_PRINT_WARN, "\n       PCIe Subsystem not  discovered   ", 0);
+      val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 01));
       return;
   }
-  while(num_rc--) {
-      if(!val_iovirt_unique_rid_strid_map(num_rc)) {
-          val_set_status(index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 1));
-          break;
+
+  num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
+
+  if (num_smmu == 0) {
+      val_print(AVS_PRINT_ERR, "\n       No SMMU Controllers are discovered ", 0);
+      val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 01));
+      return;
+  }
+
+  while (num_smmu--) {
+      if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 2) {
+          val_print(AVS_PRINT_WARN, "\n       Not valid for SMMU v2             ", 0);
+          val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 01));
+          return;
+      }
+
+      data = val_smmu_read_cfg(SMMUv3_IDR0, num_smmu);
+      if (((data >> 24) & 0x3) == 0x2) {
+          val_set_status(index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 01));
+          return;
       }
   }
-  if(num_rc < 0)
-      val_set_status(index, RESULT_PASS(g_sbsa_level, TEST_NUM, 0));
+
+  val_set_status(index, RESULT_PASS(g_sbsa_level, TEST_NUM, 01));
+
 }
 
-
 uint32_t
-i006_entry(uint32_t num_pe)
+i004_entry(uint32_t num_pe)
 {
 
   uint32_t status = AVS_STATUS_FAIL;

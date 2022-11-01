@@ -39,6 +39,7 @@
   #define PERIPHERAL_INFO_TBL_SZ 1024 /*Supports maximum 20 PCIe EPs (USB and SATA controllers only) */
   #define PCIE_INFO_TBL_SZ       512  /*Supports maximum 20 RC's*/
 
+
   #ifdef _AARCH64_BUILD_
   unsigned long __stack_chk_guard = 0xBAAAAAAD;
   unsigned long __stack_chk_fail =  0xBAAFAAAD;

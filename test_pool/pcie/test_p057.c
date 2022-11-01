@@ -39,7 +39,7 @@ payload(void)
   uint32_t test_skip = 1;
   uint32_t acs_data;
   uint32_t data;
-  uint8_t p2p_support_flag=0;
+  uint8_t p2p_support_flag = 0;
   pcie_device_bdf_table *bdf_tbl_ptr;
 
   pe_index = val_pe_get_index_mpid(val_pe_get_mpid());
@@ -57,7 +57,7 @@ payload(void)
       if ((dp_type == RCiEP) || (dp_type == iEP_EP))
       {
           /* Check if the EP Supports Multifunction */
-          if(val_pcie_multifunction_support(bdf))
+          if (val_pcie_multifunction_support(bdf))
               continue;
 
           /* Check If Endpoint supports P2P with other Functions. */

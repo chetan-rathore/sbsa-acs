@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2016-2018, 2020, 2022 Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,42 +21,35 @@
 #include "val/include/sbsa_avs_iovirt.h"
 #include "val/include/sbsa_avs_smmu.h"
 
-#define TEST_NUM   (AVS_SMMU_TEST_NUM_BASE + 5)
-#define TEST_DESC  "SMMUv2 unique intr per ctxt bank  "
+#define TEST_NUM   (AVS_SMMU_TEST_NUM_BASE + 6)
+#define TEST_DESC  "Unique stream id for each req id  "
 
 static
 void
 payload(void)
 {
-  uint32_t num_smmu;
+  int num_rc;
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
-  num_smmu = val_smmu_get_info(SMMU_NUM_CTRL, 0);
-
-  if (num_smmu == 0) {
-      val_print(AVS_PRINT_ERR, "\n       No SMMU Controllers are discovered ", 0);
+  num_rc = val_iovirt_get_pcie_rc_info(NUM_PCIE_RC, 0);
+  if (!num_rc) {
+      val_print(AVS_PRINT_ERR, "\n       No Root Complex discovered ", 0);
       val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 3));
       return;
   }
-
-  while (num_smmu--) {
-      if (val_smmu_get_info(SMMU_CTRL_ARCH_MAJOR_REV, num_smmu) == 3) {
-          val_print(AVS_PRINT_WARN, "\n       Not valid for SMMU v3             ", 0);
-          val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 2));
-          return;
-      }
-
-      if(!val_iovirt_check_unique_ctx_intid(num_smmu)) {
+  while (num_rc--) {
+      if (!val_iovirt_unique_rid_strid_map(num_rc)) {
           val_set_status(index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 1));
-          return;
+          break;
       }
   }
-
-  val_set_status(index, RESULT_PASS(g_sbsa_level, TEST_NUM, 0));
+  if (num_rc < 0)
+      val_set_status(index, RESULT_PASS(g_sbsa_level, TEST_NUM, 0));
 }
 
+
 uint32_t
-i005_entry(uint32_t num_pe)
+i006_entry(uint32_t num_pe)
 {
 
   uint32_t status = AVS_STATUS_FAIL;

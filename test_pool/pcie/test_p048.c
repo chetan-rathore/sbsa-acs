@@ -183,7 +183,7 @@ payload(void)
          * Write known value to an address which is in range
          * Base + offset should always be in the range.
          * Read the same
-        */
+         */
 
         old_value = (*(volatile uint32_t *)(mem_base + mem_offset));
         *(volatile uint32_t *)(mem_base + mem_offset) = KNOWN_DATA;
