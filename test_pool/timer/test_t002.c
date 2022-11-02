@@ -60,7 +60,7 @@ payload(void)
 
   while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index))));
 
-  if (timeout == 0){
+  if (timeout == 0) {
     val_print(AVS_PRINT_ERR, "\n       EL0-Phy timer interrupt not received on %d   ", intid);
     val_set_status(index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 01));
   }

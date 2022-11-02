@@ -39,7 +39,6 @@
   ../test_pool/pe/test_c006.c
   ../test_pool/pe/test_c007.c
   ../test_pool/pe/test_c008.c
-
   ../test_pool/pe/test_c010.c
   ../test_pool/pe/test_c011.c
   ../test_pool/pe/test_c012.c
@@ -66,6 +65,7 @@
   ../test_pool/pe/test_c034.c
   ../test_pool/pe/test_c035.c
   ../test_pool/pe/test_c036.c
+
 
   ../test_pool/gic/test_g001.c 
   ../test_pool/gic/test_g002.c

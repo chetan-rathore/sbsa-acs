@@ -32,11 +32,14 @@ payload(void)
   uint32_t index = val_pe_get_index_mpid(val_pe_get_mpid());
 
   if (val_timer_get_info(TIMER_INFO_NUM_PLATFORM_TIMERS, 0) == 0) {
-      val_print(AVS_PRINT_INFO, "\n Physical EL1 timer flag = %x", val_timer_get_info(TIMER_INFO_PHY_EL1_FLAGS, 0));
-      val_print(AVS_PRINT_INFO, "\n Physical EL2 timer flag = %x", val_timer_get_info(TIMER_INFO_PHY_EL2_FLAGS, 0));
-      val_print(AVS_PRINT_INFO, "\n Virtual EL1 timer flag  = %x", val_timer_get_info(TIMER_INFO_VIR_EL1_FLAGS, 0));
+      val_print(AVS_PRINT_INFO, "\n Physical EL1 timer flag = %x",
+                                                 val_timer_get_info(TIMER_INFO_PHY_EL1_FLAGS, 0));
+      val_print(AVS_PRINT_INFO, "\n Physical EL2 timer flag = %x",
+                                                 val_timer_get_info(TIMER_INFO_PHY_EL2_FLAGS, 0));
+      val_print(AVS_PRINT_INFO, "\n Virtual EL1 timer flag  = %x",
+                                                 val_timer_get_info(TIMER_INFO_VIR_EL1_FLAGS, 0));
 
-      if((val_timer_get_info(TIMER_INFO_PHY_EL1_FLAGS, 0) & SBSA_TIMER_FLAG_ALWAYS_ON) &&
+      if ((val_timer_get_info(TIMER_INFO_PHY_EL1_FLAGS, 0) & SBSA_TIMER_FLAG_ALWAYS_ON) &&
         (val_timer_get_info(TIMER_INFO_PHY_EL2_FLAGS, 0) & SBSA_TIMER_FLAG_ALWAYS_ON) &&
         (val_timer_get_info(TIMER_INFO_VIR_EL1_FLAGS, 0) & SBSA_TIMER_FLAG_ALWAYS_ON)) {
           val_set_status(index, RESULT_PASS(g_sbsa_level, TEST_NUM, 01));

@@ -58,7 +58,7 @@ payload(void)
       return;
   }
 
-  while(timer_num){
+  while (timer_num) {
       timer_num--;  //array index starts from 0, so subtract 1 from count
 
       if (val_timer_get_info(TIMER_INFO_IS_PLATFORM_TIMER_SECURE, timer_num))
@@ -66,12 +66,12 @@ payload(void)
 
       ns_timer++;
       timeout = TIMEOUT_LARGE;
-      val_set_status(index, RESULT_PENDING(g_sbsa_level, TEST_NUM));     // Set the initial result to pending
+      val_set_status(index, RESULT_PENDING(g_sbsa_level, TEST_NUM));
 
       //Read CNTACR to determine whether access permission from NS state is permitted
       status = val_timer_skip_if_cntbase_access_not_allowed(timer_num);
-      if(status == AVS_STATUS_SKIP){
-          val_print(AVS_PRINT_WARN, "\n       Security doesn't allow access to timer registers      ", 0);
+      if (status == AVS_STATUS_SKIP) {
+          val_print(AVS_PRINT_WARN, "\n       Security doesn't allow access to timer registers", 0);
           val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 02));
           return;
       }
@@ -92,14 +92,14 @@ payload(void)
 
       while ((--timeout > 0) && (IS_RESULT_PENDING(val_get_status(index))));
 
-      if (timeout == 0){
+      if (timeout == 0) {
            val_print(AVS_PRINT_ERR, "\n       Sys timer interrupt not received on %d   ", intid);
           val_set_status(index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 01));
           return;
       }
   }
 
-  if(!ns_timer) {
+  if (!ns_timer) {
       val_print(AVS_PRINT_WARN, "\n       No non-secure systimer implemented", 0);
       val_set_status(index, RESULT_SKIP(g_sbsa_level, TEST_NUM, 04));
       return;

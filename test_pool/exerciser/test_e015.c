@@ -68,6 +68,13 @@ static uint32_t test_sequence_check(uint32_t instance)
           return 1;
       }
   }
+
+  /* Get number of transactions captured from exerciser */
+  if (num_transactions != idx) {
+      val_print(AVS_PRINT_ERR, "\n       Exerciser %d gathering check failed", instance);
+      return 1;
+  }
+
   return 0;
 }
 

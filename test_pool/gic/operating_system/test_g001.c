@@ -35,7 +35,9 @@ payload(void)
   val_print(AVS_PRINT_INFO, "\n       Received GIC version = %4d      ", gic_version);
 
   if (gic_version < 3) {
-      val_print(AVS_PRINT_ERR, "\n       GIC version is %3x                ", gic_version);
+      val_print(AVS_PRINT_ERR,
+                "\n       GIC version is %3x, expected GICv3 or higher version",
+                gic_version);
       val_set_status(index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 02));
       return;
   }

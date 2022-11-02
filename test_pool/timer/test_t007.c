@@ -42,7 +42,7 @@ payload(void)
       return;
   }
 
-  while(timer_num){
+  while (timer_num) {
       --timer_num;  //array index starts from 0, so subtract 1 from count
 
       if (val_timer_get_info(TIMER_INFO_IS_PLATFORM_TIMER_SECURE, timer_num))
@@ -59,7 +59,7 @@ payload(void)
 
       data = val_mmio_read(cnt_ctl_base + 0x8);
       val_mmio_write(cnt_ctl_base + 0x8, 0xFFFFFFFF);
-      if(data != val_mmio_read(cnt_ctl_base + 0x8)) {
+      if (data != val_mmio_read(cnt_ctl_base + 0x8)) {
           val_print(AVS_PRINT_ERR, "\n       Read-write check failed for CNTCTLBase.CNTTIDR", 0);
           val_print(AVS_PRINT_ERR, ", expected value %x ", data);
           val_set_status(index, RESULT_FAIL(g_sbsa_level, TEST_NUM, 1));
@@ -114,7 +114,7 @@ payload(void)
 
       data = 0x3;
       val_mmio_write(cnt_base_n + 0x2C, data);
-      if(data != (val_mmio_read(cnt_base_n + 0x2C) & 0x3)) {
+      if (data != (val_mmio_read(cnt_base_n + 0x2C) & 0x3)) {
           val_print(AVS_PRINT_ERR, "\n       Read-write check failed for CNTBaseN.CNTP_CTL", 0);
           val_print(AVS_PRINT_ERR, ", expected value %x ", data);
           val_print(AVS_PRINT_ERR, "\n       Read value %x ", val_mmio_read(cnt_base_n + 0x2C));
