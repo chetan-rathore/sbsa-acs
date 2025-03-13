@@ -34,7 +34,7 @@ jobs:
       - name: Checkout bsa-acs repository
         run: |
           cd edk2
-          git clone https://github.com/ARM-software/bsa-acs.git ShellPkg/Application/bsa-acs
+          git clone -b latest https://github.com/chetan-rathore/bsa-acs.git ShellPkg/Application/bsa-acs
 
       - name: Apply edk2 sbsa patch
         run: |
@@ -77,7 +77,7 @@ jobs:
 
       - name: Git clone BSA-ACS repository
         run: |
-              git clone https://github.com/ARM-software/bsa-acs.git ../bsa-acs
+              git clone -b latest https://github.com/chetan-rathore/bsa-acs.git ../bsa-acs
 
       - name: Remove build folder if present in SBSA-ACS
         run: |
