@@ -267,7 +267,7 @@ freeSbsaAvsMem()
   val_hmat_free_info_table();
   val_srat_free_info_table();
   val_ras2_free_info_table();
-  val_pcc_free_info_table();
+  //val_pcc_free_info_table();
   val_free_shared_mem();
 }
 
