@@ -94,7 +94,8 @@ static void payload(void)
 
     if (node_count == 0) {
         val_set_status(index, RESULT_SKIP(TEST_NUM, 02));
-        val_print(ACS_PRINT_ERR, "\n       No APMT PMU nodes found", 0);
+        val_print(ACS_PRINT_TEST, "\n       No PMU nodes found in APMT table, the test must be considered fail if system has CoreSight PMU", 0);
+        val_print(ACS_PRINT_TEST, "\n       For non CoreSight PMU, manually verify A.4 PMU rules in the SBSA specification", 0);
         return;
     }
 
@@ -104,7 +105,8 @@ static void payload(void)
     }
     if (cs_com != 0x1) {
         val_set_status(index, RESULT_SKIP(TEST_NUM, 03));
-        val_print(ACS_PRINT_DEBUG, "\n       No CS PMU nodes found", 0);
+        val_print(ACS_PRINT_DEBUG, "\n       No CoreSight PMU nodes found", 0);
+        val_print(ACS_PRINT_TEST, "\n        For non CoreSight PMU, manually verify A.4 PMU rules in the SBSA specification", 0);
         return;
     }
 
